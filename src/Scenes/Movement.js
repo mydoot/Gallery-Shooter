@@ -16,6 +16,10 @@ class Movement extends Phaser.Scene {
 
         this.myScore = 0; 
 
+        this.Playerhealth = 5;
+
+        this.canbehit = true;
+
     }
 
     // Use preload to load art and sound assets before the scene starts running.
@@ -114,7 +118,10 @@ class Movement extends Phaser.Scene {
         my.sprite.enemybulletGroup.propertyValueSet("speed", 2);
 
 // Put score on screen
-my.text.score = this.add.bitmapText(580, 0, "rocketSquare", "Score " + this.myScore);
+my.text.score = this.add.bitmapText(580, 0, "rocketSquare", "Score: " + this.myScore);
+
+
+my.text.health = this.add.bitmapText(580, 50, "rocketSquare", "Health: " + this.Playerhealth);
 
 // Put title on screen
 this.add.text(10, 5, "Exodus", {
@@ -150,7 +157,7 @@ this.add.text(10, 5, "Exodus", {
 
         my.sprite.bulletGroup.getChildren().forEach(bullet => {
             if (bullet) {
-                if (this.collides(bullet, my.sprite.enemy)) {
+                if (this.collides(my.sprite.enemy, bullet)) {
                     // start animation
                     this.puff = this.add.sprite(my.sprite.enemy.x, my.sprite.enemy.y, "whitePuff03").setScale(0.25).play("puff");
                     bullet.makeInactive();
@@ -166,6 +173,35 @@ this.add.text(10, 5, "Exodus", {
                     this.puff.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
                         my.sprite.enemy.Spawn();
                     }, this);
+    
+                }
+            }
+ 
+        });
+
+        my.sprite.enemybulletGroup.getChildren().forEach(Ebullet => {
+            if (Ebullet) {
+                if (this.collides(my.sprite.body, Ebullet)) {
+                    if (this.canbehit){
+                        this.canbehit = false;
+                        // start animation
+                        this.puff = this.add.sprite(my.sprite.body.x, my.sprite.body.y, "whitePuff03").setScale(0.25).play("puff");
+                        Ebullet.makeEInactive();
+                        
+                        this.Playerhealth -= 1;
+                        this.updateHealth();
+                        // Play sound
+                        /* this.sound.play("dadada", {
+                            volume: 1   // Can adjust volume using this, goes from 0 to 1
+                        }); */
+                        // Have new hippo appear after end of animation
+                        /* this.puff.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+                            my.sprite.enemy.Spawn();
+                        }, this); */
+                        this.puff.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+                            this.canbehit = true;
+                        }, this);
+                    }
     
                 }
             }
@@ -196,12 +232,12 @@ this.add.text(10, 5, "Exodus", {
     }
 
     collides(a, b) {
-        if (Math.abs(a.x - b.x) > (a.displayWidth/2 + b.displayWidth/2)) {
+        if (Math.abs(a.x - b.x) > (a.displayWidth/5 + b.displayWidth/5)) {
             //console.log("whiff");
             return false;
         
             }    
-        if (Math.abs(a.y - b.y) > (a.displayHeight/2 + b.displayHeight/2)){
+        if (Math.abs(a.y - b.y) > (a.displayHeight/5 + b.displayHeight/5)){
          //console.log("whiff");
             return false;
         }    
@@ -212,7 +248,12 @@ this.add.text(10, 5, "Exodus", {
 
     updateScore() {
         let my = this.my;
-        my.text.score.setText("Score " + this.myScore);
+        my.text.score.setText("Score: " + this.myScore);
+    }
+
+    updateHealth() {
+        let my = this.my;
+        my.text.health.setText("Health:  " + this.Playerhealth);
     }
 
 }
