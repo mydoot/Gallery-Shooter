@@ -2,6 +2,27 @@ class Movement extends Phaser.Scene {
     constructor() {
         super("Movement");
 
+       /*  this.my = {sprite: {}, text: {}};
+        // Create an object to hold sprite bindings
+        
+        this.bodyX = 400;
+        this.bodyY = 500;
+
+        this.bulletCooldown = 15;        // Number of update() calls to wait before making a new bullet
+        this.bulletCooldownCounter = 0;
+
+        this.enemybulletCooldown = 100;        // Number of update() calls to wait before making a new bullet
+        this.enemybulletCooldownCounter = 0;
+
+        this.myScore = 0; 
+
+        this.Playerhealth = 5;
+
+        this.canbehit = true; */
+
+    }
+
+    init(){
         this.my = {sprite: {}, text: {}};
         // Create an object to hold sprite bindings
         
@@ -19,7 +40,9 @@ class Movement extends Phaser.Scene {
         this.Playerhealth = 5;
 
         this.canbehit = true;
-
+        
+        this.playerSpeed = 7;
+        this.bulletSpeed = 10;
     }
 
     // Use preload to load art and sound assets before the scene starts running.
@@ -48,8 +71,7 @@ class Movement extends Phaser.Scene {
     create() {
         let my = this.my;
 
-        this.playerSpeed = 7;
-        this.bulletSpeed = 10;
+       
 
         my.AKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
         my.DKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
@@ -183,6 +205,7 @@ this.add.text(10, 5, "Exodus", {
             if (Ebullet) {
                 if (this.collides(my.sprite.body, Ebullet)) {
                     if (this.canbehit){
+                        
                         this.canbehit = false;
                         // start animation
                         this.puff = this.add.sprite(my.sprite.body.x, my.sprite.body.y, "whitePuff03").setScale(0.25).play("puff");
@@ -190,6 +213,9 @@ this.add.text(10, 5, "Exodus", {
                         
                         this.Playerhealth -= 1;
                         this.updateHealth();
+                        if (this.Playerhealth == 0){
+                            this.scene.restart()
+                        }
                         // Play sound
                         /* this.sound.play("dadada", {
                             volume: 1   // Can adjust volume using this, goes from 0 to 1
