@@ -11,6 +11,9 @@ class Movement extends Phaser.Scene {
         this.bulletCooldown = 15;        // Number of update() calls to wait before making a new bullet
         this.bulletCooldownCounter = 0;
 
+        this.enemybulletCooldown = 100;        // Number of update() calls to wait before making a new bullet
+        this.enemybulletCooldownCounter = 0;
+
         this.myScore = 0; 
 
     }
@@ -22,6 +25,8 @@ class Movement extends Phaser.Scene {
         this.load.image("shipBody", "ship_H.png");
         
         this.load.image("shipProjectile", "star_tiny.png");
+
+        this.load.image("enemyshipProjectile", "star_small.png");
 
         this.load.image("enemyShip", "ship_I.png");
 
@@ -91,6 +96,23 @@ class Movement extends Phaser.Scene {
         });
         my.sprite.bulletGroup.propertyValueSet("speed", this.bulletSpeed);
 
+        //enemy bullet group
+        my.sprite.enemybulletGroup = this.add.group({
+            active: true,
+            defaultKey: "enemyshipProjectile",
+            maxSize: 20,
+            runChildUpdate: true
+            }
+        )
+
+        my.sprite.enemybulletGroup.createMultiple({
+            classType: EnemyBullet,
+            active: false,
+            key: my.sprite.enemybulletGroup.defaultKey,
+            repeat: my.sprite.enemybulletGroup.maxSize-1
+        });
+        my.sprite.enemybulletGroup.propertyValueSet("speed", 2);
+
 // Put score on screen
 my.text.score = this.add.bitmapText(580, 0, "rocketSquare", "Score " + this.myScore);
 
@@ -108,6 +130,7 @@ this.add.text(10, 5, "Exodus", {
     update() {
         let my = this.my;
         this.bulletCooldownCounter--;
+        this.enemybulletCooldownCounter--;
 
         // Check for bullet being fired
         if (my.SpaceKey.isDown) {
@@ -116,6 +139,7 @@ this.add.text(10, 5, "Exodus", {
                 let bullet = my.sprite.bulletGroup.getFirstDead();
                 // bullet will be null if there are no inactive (available) bullets
                 if (bullet != null) {
+                    console.log("shoot");
                     this.bulletCooldownCounter = this.bulletCooldown;
                     bullet.makeActive();
                     bullet.x = my.sprite.body.x;
@@ -124,39 +148,66 @@ this.add.text(10, 5, "Exodus", {
             }
         }
 
-        let bullet = my.sprite.bulletGroup.getFirstDead();
-        if (bullet) {
-            if (this.collides(my.sprite.enemy, bullet)) {
-                // start animation
-                this.puff = this.add.sprite(my.sprite.enemy.x, my.sprite.enemy.y, "whitePuff03").setScale(0.25).play("puff");
-               
-                bullet.makeInactive();
-                my.sprite.enemy.Destroy();
-                // Update score
-                this.myScore += my.sprite.enemy.scorePoints;
-                this.updateScore();
-                // Play sound
-                /* this.sound.play("dadada", {
-                    volume: 1   // Can adjust volume using this, goes from 0 to 1
-                }); */
-                // Have new hippo appear after end of animation
-                this.puff.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-                    my.sprite.enemy.Spawn();
-                }, this);
-
+        my.sprite.bulletGroup.getChildren().forEach(bullet => {
+            if (bullet) {
+                if (this.collides(bullet, my.sprite.enemy)) {
+                    // start animation
+                    this.puff = this.add.sprite(my.sprite.enemy.x, my.sprite.enemy.y, "whitePuff03").setScale(0.25).play("puff");
+                    bullet.makeInactive();
+                    my.sprite.enemy.Destroy();
+                    // Update score
+                    this.myScore += my.sprite.enemy.scorePoints;
+                    this.updateScore();
+                    // Play sound
+                    /* this.sound.play("dadada", {
+                        volume: 1   // Can adjust volume using this, goes from 0 to 1
+                    }); */
+                    // Have new hippo appear after end of animation
+                    this.puff.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+                        my.sprite.enemy.Spawn();
+                    }, this);
+    
+                }
             }
-        }
-        
+ 
+        });
+      
 
+
+            if (this.enemybulletCooldownCounter < 0) {
+                // Get the first inactive bullet, and make it active
+                let Enemybullet = my.sprite.enemybulletGroup.getFirstDead();
+                // bullet will be null if there are no inactive (available) bullets
+                if (Enemybullet != null) {
+                    console.log("enemybul");
+                    this.enemybulletCooldownCounter = this.enemybulletCooldown;
+                    Enemybullet.makeEActive();
+                    Enemybullet.x = my.sprite.enemy.x;
+                    Enemybullet.y = my.sprite.enemy.y + (my.sprite.enemy.displayHeight/2);
+                }
+            }
+    
+
+
+        
         my.sprite.body.update();
 
 
     }
 
     collides(a, b) {
-        if (Math.abs(a.x - b.x) > (a.displayWidth/2 + b.displayWidth/2)) return false;
-        if (Math.abs(a.y - b.y) > (a.displayHeight/2 + b.displayHeight/2)) return false;
+        if (Math.abs(a.x - b.x) > (a.displayWidth/2 + b.displayWidth/2)) {
+            //console.log("whiff");
+            return false;
+        
+            }    
+        if (Math.abs(a.y - b.y) > (a.displayHeight/2 + b.displayHeight/2)){
+         //console.log("whiff");
+            return false;
+        }    
+        
         return true;
+        
     }
 
     updateScore() {
