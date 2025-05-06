@@ -10,7 +10,11 @@ class Enemy extends Phaser.GameObjects.Sprite {
     }
 
     update() {
-        
+        this.y += 0.75;
+        if (this.y > (this.displayHeight * 10)) {
+            this.Destroy();
+            this.Spawn();
+        }
     }
 
    Destroy(){
@@ -24,7 +28,7 @@ class Enemy extends Phaser.GameObjects.Sprite {
     this.visible = true;
     this.angle = 180;
     this.x = Math.random()*config.width;
-    this.y = Math.random()*config.height - 50;
+    this.y = 0;
    }
 
 }

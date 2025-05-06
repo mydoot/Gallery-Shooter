@@ -1,10 +1,10 @@
-class Enemy extends Phaser.GameObjects.Sprite {
+class PathEnemy extends Phaser.GameObjects.Sprite {
     constructor(scene, x, y, texture, frame) {        
         super(scene, x, y, texture, frame);
         //this.visible = false;
         //this.active = false;
         this.canShoot = false;
-        scene.add.existing(this);
+        //scene.add.existing(this);
 
         return this;
     }
