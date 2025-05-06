@@ -1,4 +1,8 @@
 class Movement extends Phaser.Scene {
+    graphics;
+    curve;
+    path;
+    
     constructor() {
         super("Movement");
 
@@ -43,6 +47,9 @@ class Movement extends Phaser.Scene {
         
         this.playerSpeed = 7;
         this.bulletSpeed = 10;
+    
+        this.runMode = false;
+    
     }
 
     // Use preload to load art and sound assets before the scene starts running.
@@ -71,6 +78,12 @@ class Movement extends Phaser.Scene {
     create() {
         let my = this.my;
 
+        //for path
+        this.points = [
+            10, 175,
+            788, 175
+        ];
+        this.curve = new Phaser.Curves.Spline(this.points);
        
 
         my.AKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -254,7 +267,43 @@ this.add.text(10, 5, "Exodus", {
         
         my.sprite.body.update();
 
+        //enemy path movement
+        if (this.curve.points.length > 0){
+                
+            console.log("Run mode");
+            //
+            if (!this.runMode){
+                this.runMode = true;
+                    //console.log(this.curve.points.length);
+                        my.sprite.enemy.x = this.curve.points[0].x 
+                        my.sprite.enemy.y = this.curve.points[0].y 
+                //startFollow
+                my.sprite.enemy.startFollow(
+                    {
+                        from: 0,
+                        to: 1,
+                        delay: 0,
+                        duration: 2000,
+                        ease: 'Sine.easeInOut',
+                        repeat: -1,
+                        yoyo: true,
+                        rotateToPath: true,
+                        rotationOffset: -90
+                    }
+                )
+            } else if (this.runMode){
+                console.log("Run mode disabled");
+                this.runMode = false;
+                my.sprite.enemy.stopFollow();
+                
+            }
+           
+        } else {
+            console.log("There are no points.");
+        }
 
+
+        
     }
 
     collides(a, b) {
